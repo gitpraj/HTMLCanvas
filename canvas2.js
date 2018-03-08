@@ -1,6 +1,8 @@
 console.log("is it working?");
 
 var canvas = document.querySelector('canvas');
+var name_text = $('.name-text');
+// console.log(name_text)
 var canvas_height = 420;
 canvas.width = window.innerWidth;
 canvas.height = canvas_height;
@@ -59,7 +61,7 @@ window.addEventListener('mousemove', function(event) {
     // console.log(event);
     mouse.x = event.x;
     mouse.y = event.y;
-    console.log(mouse);
+    // console.log(mouse);
 })
 
 window.addEventListener('resize', function() {
@@ -69,12 +71,13 @@ window.addEventListener('resize', function() {
   init();
 })
 
-function Circle(x,y, dx, dy, rad) {
+function Circle(x,y, dx, dy, rad, type) {
     this.x = x;
     this.y = y;
     this.dx = dx;
     this.dy = dy;
     this.rad = rad;
+    this.type = type;
     this.minRad = rad;
     this.color = '#F27B01';
 
@@ -99,13 +102,42 @@ function Circle(x,y, dx, dy, rad) {
       this.y += this.dy;
 
       // interactivity
-      if (mouse.x - this.x < 50 && mouse.x - this.x > -50
-          && mouse.y - this.y < 50 && mouse.y - this.y > -50) {
-            if (this.rad < maxRadius) {
-                this.rad += 1
-            }
-      } else if (this.rad > this.minRad) {
-        this.rad -= 1;
+      if (this.type == "dynamic") {
+        if (mouse.x - this.x < 50 && mouse.x - this.x > -50
+            && mouse.y - this.y < 50 && mouse.y - this.y > -50) {
+              if (this.rad < maxRadius) {
+                  this.rad += 1
+                  // increase text size as well
+                  name_text.css('font-size', '60px');
+                  name_text.fadeIn("3000");
+              }
+        } else if (this.rad > this.minRad) {
+          this.rad -= 1;
+          name_text.css('font-size', '40px');
+          name_text.fadeOut("3000");
+          // decrease text size as well
+        }
+      } else {
+
+        if (mouse.x - this.x < 50 && mouse.x - this.x > -50
+            && mouse.y - this.y < 50 && mouse.y - this.y > -50) {
+
+              if (this.dx == 0 && this.x < 700)  {
+                console.log("okay")
+                // move the static circle
+                this.dx = 7;
+              } else if ((this.x > 700) && (this.dx == 0)) {
+                // // make it stop
+                console.log("stop circle. time to go reverse")
+                this.dx = -7;
+              }
+        } else if ((this.x > 1420) && (this.dx != 0)) {
+            console.log("stop circle")
+            this.dx = 0;
+        } else if ((this.x < 100) && (this.dx != 0)) {
+            console.log("stop circle reverse")
+            this.dx = 0;
+        }
       }
 
       this.draw();
@@ -124,8 +156,20 @@ function init() {
       var dx = 0;
       var dy = 1;
 
-      circleArray.push(new Circle(x, y, dx, dy, rad));
+      circleArray.push(new Circle(x, y, dx, dy, rad, "dynamic"));
   }
+
+  circleArray.push(new Circle(100, 100, 0, 0, 50, "static"));
+
+  // var x = 100;
+  // var y = 100;
+  // c.beginPath();
+  // var rad = 50;
+  // c.arc(x, y, rad, 0, Math.PI * 2, false);
+  // // c.strokeStyle = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+  // c.fillStyle = '#F27B01'
+  // c.fill();
+
 }
 
 
@@ -145,3 +189,15 @@ function animate() {
 
 init();
 animate();
+
+// change color of sun when color option is clicked
+var color_choose = $('.color-choose');
+console.log(color_choose)
+color_choose.each(function(index, element) {
+  $(element).click(function() {
+    console.log( index + ": " + $(element).css("backgroundColor"));
+    console.log("color option clicked")
+    circleArray[0].color = $(element).css("backgroundColor");
+    console.log("circleArray: " + JSON.stringify(circleArray));
+  });
+});
